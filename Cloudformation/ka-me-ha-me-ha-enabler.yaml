@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: CloudFormation template to create a lambda function
+
+Parameters:
+  LambdaFunctionName:
+    Type: String
+    Default: ka-me-ha-me-ha-enabler
+    Description: Enter the name of the lambda function
+
+Resources:
+  MyLambdaEnabler:
+    Type: AWS::Lambda::Function
+    DependsOn:
+          - MyLambdaRole
+    Properties:
+      Runtime: python3.12
+      Handler: app.lambda_handler
+      FunctionName: !Ref LambdaFunctionName
+      Code: 
+        S3Bucket: my-code-for-task
+        S3Key: app.zip
+      Description: This is a lambda function for adding a object in s3 bucket.
+      Role: 
+        Fn::ImportValue: !Sub MyLambdaRoleArn-s3-Ddb
+  
+
+
+  MyEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      BatchSize: 100
+      FunctionName: !Ref    MyLambdaEnabler
+      EventSourceArn: 
+        Fn::ImportValue: !Sub MyGlobalTableArn
+      StartingPosition: "LATEST"
+
+Outputs:
+  LambdaFunctionArn:
+    Description: "ARN of the Lambda function"
+    Value: !GetAtt MyLambdaEnabler.Arn

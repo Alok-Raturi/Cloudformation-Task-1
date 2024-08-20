@@ -1,0 +1,73 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: This is a role which we will attach to lambda
+
+Parameters:
+  S3Bucket:
+    Type: String
+    Default: ka-me-ha-me-ha
+    Description: Name of the S3 bucket 
+  DynamoDBTableName:
+    Type: String
+    Default: ka-me-ha-me-ha-archives
+    Description: Name of the Global table to create
+  Region1:
+    Type: String
+    Description: Region 1 name
+    Default: ap-south-1
+  Region2:
+    Type: String
+    Description: Region 2 name
+    Default: us-west-2
+
+Resources:
+  MyLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: MyLambdaExecutionsRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: DynamoDBPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:DescribeStream
+                  - dynamodb:GetRecords
+                  - dynamodb:GetShardIterator
+                  - dynamodb:ListStreams
+                Resource: '*'
+        - PolicyName: CloudWatchLogsPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+        - PolicyName: S3Policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:*
+                Resource: '*'
+
+Outputs:
+  RoleArn:
+    Description: Arn of the role
+    Value: !GetAtt MyLambdaRole.Arn
+    Export: 
+      Name: MyLambdaRoleArn-s3-Ddb

@@ -1,0 +1,111 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: CloudFormation template to create a DynamoDB Global Table
+
+Parameters:
+  MyGlobalTableName:
+    Type: String
+    Default: ka-me-ha-me-ha-archives
+    Description: Name of the Global table to create
+
+  Region1:
+    Type: String
+    Default: us-west-2
+    Description: The first region for the replica
+
+  Region2:
+    Type: String
+    Default: ap-south-1
+    Description: The second region for the replica
+
+Resources:
+  MyGlobalTable:
+    Type: AWS::DynamoDB::GlobalTable
+    Properties:
+      TableName: !Ref MyGlobalTableName
+      AttributeDefinitions: 
+        - AttributeName: User_id
+          AttributeType: S
+        - AttributeName: Game_id
+          AttributeType: S
+        - AttributeName: User_name
+          AttributeType: S
+        - AttributeName: User_age
+          AttributeType: N
+      KeySchema:
+        - AttributeName: User_id
+          KeyType: HASH
+        - AttributeName: Game_id
+          KeyType: RANGE
+      LocalSecondaryIndexes:
+        - IndexName: NameIndex
+          KeySchema:
+            - AttributeName: User_id
+              KeyType: HASH
+            - AttributeName: User_name
+              KeyType: RANGE
+          Projection:
+            NonKeyAttributes:
+              - Game_id
+              - User_age
+            ProjectionType: INCLUDE
+        - IndexName: AgeIndex
+          KeySchema:
+            - AttributeName: User_id
+              KeyType: HASH
+            - AttributeName: User_age
+              KeyType: RANGE
+          Projection:
+            NonKeyAttributes:
+              - Game_id
+              - User_name
+            ProjectionType: INCLUDE
+                
+      Replicas:
+        - Region: !Ref Region1
+          ReadProvisionedThroughputSettings:
+            ReadCapacityAutoScalingSettings:
+              MinCapacity: 1
+              MaxCapacity: 5
+              TargetTrackingScalingPolicyConfiguration:
+                TargetValue: 70
+          TableClass: STANDARD
+          Tags:
+            - Key: Environment
+              Value: Dev
+            - Key: Project
+              Value: Task-1
+
+        - Region: !Ref Region2
+          ReadProvisionedThroughputSettings:
+            ReadCapacityAutoScalingSettings:
+              MinCapacity: 1
+              MaxCapacity: 5
+              TargetTrackingScalingPolicyConfiguration:
+                TargetValue: 70
+          TableClass: STANDARD
+          Tags:
+            - Key: Environment
+              Value: Dev
+            - Key: Project
+              Value: Task-1
+
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+
+      WriteProvisionedThroughputSettings:
+        WriteCapacityAutoScalingSettings:
+          MinCapacity: 4
+          MaxCapacity: 10
+          TargetTrackingScalingPolicyConfiguration:
+            TargetValue: 70
+
+Outputs:
+  GlobalTableName:
+    Description: The name of the Global Table
+    Value: !Ref MyGlobalTableName
+
+  GlobalTableStreamArn:
+    Description: The ARN of the Global Table
+    Value: !GetAtt MyGlobalTable.StreamArn
+    Export:
+      Name: MyGlobalTableArn
