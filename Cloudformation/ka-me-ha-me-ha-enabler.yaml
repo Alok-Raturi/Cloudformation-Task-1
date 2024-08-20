@@ -10,9 +10,9 @@ Parameters:
 Resources:
   MyLambdaEnabler:
     Type: AWS::Lambda::Function
-    DependsOn:
-          - MyLambdaRole
     Properties:
+      Role: 
+        Fn::ImportValue: !Sub MyLambdaRoleArn-s3-Ddb
       Runtime: python3.12
       Handler: app.lambda_handler
       FunctionName: !Ref LambdaFunctionName
@@ -20,8 +20,6 @@ Resources:
         S3Bucket: my-code-for-task
         S3Key: app.zip
       Description: This is a lambda function for adding a object in s3 bucket.
-      Role: 
-        Fn::ImportValue: !Sub MyLambdaRoleArn-s3-Ddb
   
 
 

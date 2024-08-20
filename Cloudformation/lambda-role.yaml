@@ -23,7 +23,7 @@ Resources:
   MyLambdaRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: MyLambdaExecutionsRole
+      RoleName: MyLambdaExecutionRole
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
