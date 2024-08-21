@@ -1,3 +1,4 @@
 TODO:
-Least privilege criteria
-Filtering criteria
+* Least privilege criteria---Done
+* Filtering criteria --- Done
+* Lambda Init time

@@ -31,6 +31,9 @@ Resources:
       EventSourceArn: 
         Fn::ImportValue: !Sub MyGlobalTableArn
       StartingPosition: "LATEST"
+      FilterCriteria:
+        Filters:
+             - Pattern: '{"eventName": ["INSERT"]}'
 
 Outputs:
   LambdaFunctionArn:
