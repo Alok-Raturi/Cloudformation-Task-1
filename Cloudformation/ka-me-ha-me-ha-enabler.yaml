@@ -13,6 +13,7 @@ Resources:
     Properties:
       Role: 
         Fn::ImportValue: !Sub MyLambdaRoleArn-s3-Ddb
+      Timeout: 40
       Runtime: python3.12
       Handler: app.lambda_handler
       FunctionName: !Ref LambdaFunctionName
