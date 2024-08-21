@@ -45,7 +45,9 @@ Resources:
                   - dynamodb:GetRecords
                   - dynamodb:GetShardIterator
                   - dynamodb:ListStreams
-                Resource: '*'
+                Resource: 
+                  - !Sub arn:aws:dynamodb:${Region1}:${AWS::AccountId}:table/${DynamoDBTableName}/stream/*
+                  - !Sub arn:aws:dynamodb:${Region2}:${AWS::AccountId}:table/${DynamoDBTableName}/stream/*
         - PolicyName: CloudWatchLogsPolicy
           PolicyDocument:
             Version: 2012-10-17
@@ -62,8 +64,12 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - s3:*
-                Resource: '*'
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:ListBucket
+                Resource: 
+                  - !Sub arn:aws:s3:::${S3Bucket}
+                  - !Sub arn:aws:s3:::${S3Bucket}/*
 
 Outputs:
   RoleArn:
