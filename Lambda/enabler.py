@@ -7,14 +7,12 @@ s3 = boto3.client('s3')
 bucket_name = 'ka-me-ha-me-ha'
 file_name = 'teenage-mutant-ninja-turtles.json'
 
-file_content_format = {
-    'previous': {},
-    'current': {}
-}
-
 
 def initial_file_state():
-    initial_file_content = json.dumps(file_content_format)
+    initial_file_content = json.dumps({
+        'previous': {},
+        'current': {}
+    })
     s3.put_object(Bucket=bucket_name, Key=file_name, Body=initial_file_content)
     return json.loads(initial_file_content)
 
@@ -28,6 +26,43 @@ def swap_data(old_data, new_data):
 
 
 def lambda_handler(event, context):
+    """
+    ------ Sample Event Argument  -------
+    {
+        "Records": [
+            {
+                "eventID": "e6f0de19a4a55f39ca38480c4f2ede99",
+                "eventName": "INSERT",
+                "eventVersion": "1.1",
+                "eventSource": "aws:dynamodb",
+                "awsRegion": "ap-south-1",
+                "dynamodb": {
+                    "ApproximateCreationDateTime": 1724239032,
+                    "Keys": {
+                        "Game_id": {
+                            "S": "game-1"
+                        },
+                        "User_id": {
+                            "S": "alok-1"
+                        }
+                    },
+                    "NewImage": {
+                        "Game_id": {
+                            "S": "game-1"
+                        },
+                        "User_id": {
+                            "S": "alok-1"
+                        }
+                    },
+                    "SequenceNumber": "42600004062755084192341",
+                    "SizeBytes": 52,
+                    "StreamViewType": "NEW_AND_OLD_IMAGES"
+                },
+                "eventSourceARN":"arn:aws:dynamodb:ap-south-1:891377219026:table/ka-me-ha-me-ha-archives/stream/2024-08-21T11:03:33.380"
+            }
+        ]
+    }
+    """
     if event['Records'][0]['eventName'] != 'INSERT':
         return {
             'statusCode': 500,

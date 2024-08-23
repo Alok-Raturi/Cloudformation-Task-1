@@ -1,8 +1,8 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: CloudFormation template to create a DynamoDB Global Table
+Description: CloudFormation template to create a DynamoDB Global Table | ka-me-ha-me-ha-archives
 
 Parameters:
-  MyGlobalTableName:
+  GlobalTableName:
     Type: String
     Default: ka-me-ha-me-ha-archives
     Description: Name of the Global table to create
@@ -18,10 +18,10 @@ Parameters:
     Description: The second region for the replica
 
 Resources:
-  MyGlobalTable:
+  KamehamehaArchivesTable:
     Type: AWS::DynamoDB::GlobalTable
     Properties:
-      TableName: !Ref MyGlobalTableName
+      TableName: !Ref GlobalTableName
       AttributeDefinitions: 
         - AttributeName: User_id
           AttributeType: S
@@ -44,10 +44,7 @@ Resources:
             - AttributeName: User_name
               KeyType: RANGE
           Projection:
-            NonKeyAttributes:
-              - Game_id
-              - User_age
-            ProjectionType: INCLUDE
+            ProjectionType: KEYS_ONLY
         - IndexName: AgeIndex
           KeySchema:
             - AttributeName: User_id
@@ -55,10 +52,7 @@ Resources:
             - AttributeName: User_age
               KeyType: RANGE
           Projection:
-            NonKeyAttributes:
-              - Game_id
-              - User_name
-            ProjectionType: INCLUDE
+            ProjectionType: KEYS_ONLY
                 
       Replicas:
         - Region: !Ref Region1
@@ -100,12 +94,8 @@ Resources:
             TargetValue: 70
 
 Outputs:
-  GlobalTableName:
-    Description: The name of the Global Table
-    Value: !Ref MyGlobalTableName
-
   GlobalTableStreamArn:
     Description: The ARN of the Global Table
-    Value: !GetAtt MyGlobalTable.StreamArn
+    Value: !GetAtt KamehamehaArchivesTable.StreamArn
     Export:
-      Name: MyGlobalTableArn
+      Name: GlobalTableStreamArn
