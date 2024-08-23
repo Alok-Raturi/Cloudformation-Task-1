@@ -8,15 +8,10 @@ Parameters:
     Description: Name of the S3 bucket to create
 
 Resources:
-  MyS3Bucket:
-    Type: 'AWS::S3::Bucket'
+  KamehamehaBucket:
+    Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref BucketName
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        IgnorePublicAcls: true
-        BlockPublicPolicy: true
-        RestrictPublicBuckets: true
       Tags:
         - Key: Environment
           Value: Dev
@@ -24,6 +19,6 @@ Resources:
           Value: Task-1
 
 Outputs:
-  BucketRef:
+  BucketName:
     Description: Name of the created S3 bucket
-    Value: !Ref MyS3Bucket
+    Value: !Ref KamehamehaBucket

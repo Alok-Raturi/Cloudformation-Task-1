@@ -6,7 +6,7 @@ Parameters:
     Type: String
     Description: "Enter the name of the bucket"
     Default: ka-me-ha-me-ha
-  MyGlobalTableName:
+  GlobalTableName:
     Type: String
     Description: "Enter the name of the global table"
     Default: ka-me-ha-me-ha-archives
@@ -19,16 +19,16 @@ Resources:
   S3BucketStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://my-code-for-task.s3.ap-south-1.amazonaws.com/s3-bucket.yaml
+      TemplateURL: https://my-code-for-task.s3.ap-south-1.amazonaws.com/ka-me-ha-me-ha-bucket.yaml
       Parameters:
         BucketName: !Ref BucketName
 
   DynamoDBStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://my-code-for-task.s3.ap-south-1.amazonaws.com/dynamo-db.yaml
+      TemplateURL: https://my-code-for-task.s3.ap-south-1.amazonaws.com/ka-me-ha-me-ha-archives.yaml
       Parameters:
-        MyGlobalTableName: !Ref MyGlobalTableName
+        GlobalTableName: !Ref GlobalTableName
         Region1: us-west-2
         Region2: ap-south-1
 
@@ -40,16 +40,16 @@ Resources:
     Properties:
       TemplateURL: https://my-code-for-task.s3.ap-south-1.amazonaws.com/lambda-role.yaml
       Parameters:
-        DynamoDBTableName: !Ref MyGlobalTableName
+        GlobalTableName: !Ref GlobalTableName
         Region1: us-west-2
         Region2: ap-south-1
-        S3Bucket: !Ref BucketName
+        S3BucketName: !Ref BucketName
   
   LambdaStack:
     Type: AWS::CloudFormation::Stack
     DependsOn:
          - LambdaRoleStack
     Properties:
-      TemplateURL: https://my-code-for-task.s3.ap-south-1.amazonaws.com/lambda.yaml
+      TemplateURL: https://my-code-for-task.s3.ap-south-1.amazonaws.com/ka-me-ha-me-ha-enabler.yaml
       Parameters:
         LambdaFunctionName: !Ref LambdaFunctionName
