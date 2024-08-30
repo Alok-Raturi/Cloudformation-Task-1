@@ -1,0 +1,24 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: CloudFormation template to create an S3 bucket
+
+Parameters:
+  BucketName:
+    Type: String
+    Default: ka-me-ha-me-ha
+    Description: Name of the S3 bucket to create
+
+Resources:
+  KamehamehaBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      Tags:
+        - Key: Environment
+          Value: Dev
+        - Key: Project
+          Value: Task-1
+
+Outputs:
+  BucketName:
+    Description: Name of the created S3 bucket
+    Value: !Ref KamehamehaBucket

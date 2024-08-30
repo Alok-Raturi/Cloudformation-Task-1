@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Role for lambda enabler function
+
+Parameters:
+  S3BucketName:
+    Type: String
+    Default: ka-me-ha-me-ha
+    Description: Name of the S3 bucket 
+  GlobalTableName:
+    Type: String
+    Default: ka-me-ha-me-ha-archives
+    Description: Name of the Global table to create
+  Region1:
+    Type: String
+    Description: Region 1 name
+    Default: ap-south-1
+  Region2:
+    Type: String
+    Description: Region 2 name
+    Default: us-west-2
+
+Resources:
+  EnablerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: Lambda-enabler-role
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: DynamoDBPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:DescribeStream
+                  - dynamodb:GetRecords
+                  - dynamodb:GetShardIterator
+                  - dynamodb:ListStreams
+                Resource: 
+                  - !Sub arn:aws:dynamodb:${Region1}:${AWS::AccountId}:table/${GlobalTableName}/stream/*
+                  - !Sub arn:aws:dynamodb:${Region2}:${AWS::AccountId}:table/${GlobalTableName}/stream/*
+        - PolicyName: CloudWatchLogsPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+        - PolicyName: S3Policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:ListBucket
+                Resource: 
+                  - !Sub arn:aws:s3:::${S3BucketName}
+                  - !Sub arn:aws:s3:::${S3BucketName}/*
+
+Outputs:
+  EnablerRoleArn:
+    Description: Arn of the role
+    Value: !GetAtt EnablerRole.Arn
+    Export: 
+      Name: EnablerRoleArn

@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: CloudFormation template to create a lambda function
+
+
+Parameters:
+  LambdaFunctionName:
+    Type: String
+    Default: ka-me-ha-me-ha-enabler
+    Description: Enter the name of the lambda function
+
+
+Resources:
+  kamehamehaEnabler:
+    Type: AWS::Lambda::Function
+    Properties:
+      Role: 
+        Fn::ImportValue: !Sub EnablerRoleArn
+      Timeout: 40
+      Runtime: python3.12
+      Handler: enabler.lambda_handler
+      FunctionName: !Ref LambdaFunctionName
+      Code: 
+        S3Bucket: my-code-for-task
+        S3Key: enabler.zip
+      Description: This is a lambda function for adding a object in s3 bucket.
+  
+  TableToEnablerMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      FunctionName: !Ref kamehamehaEnabler
+      StartingPosition: LATEST
+      EventSourceArn: 
+        Fn::ImportValue: !Sub GlobalTableStreamArn
+      FilterCriteria:
+        Filters:
+             - Pattern: "{\"eventName\": [\"INSERT\"]}"
+
+Outputs:
+  LambdaFunctionArn:
+    Description: "ARN of the Lambda function"
+    Value: !GetAtt kamehamehaEnabler.Arn

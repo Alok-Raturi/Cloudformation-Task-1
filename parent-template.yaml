@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Parent stack for managing nested stacks
+
+Parameters:
+  BucketName:
+    Type: String
+    Description: "Enter the name of the bucket"
+    Default: ka-me-ha-me-ha
+  GlobalTableName:
+    Type: String
+    Description: "Enter the name of the global table"
+    Default: ka-me-ha-me-ha-archives
+  LambdaFunctionName:
+    Type: String
+    Description: "Enter the name of the lambda function"
+    Default: ka-me-ha-me-ha-enabler
+
+Resources:
+  S3BucketStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://my-code-for-task.s3.ap-south-1.amazonaws.com/ka-me-ha-me-ha-bucket.yaml
+      Parameters:
+        BucketName: !Ref BucketName
+
+  DynamoDBStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://my-code-for-task.s3.ap-south-1.amazonaws.com/ka-me-ha-me-ha-archives.yaml
+      Parameters:
+        GlobalTableName: !Ref GlobalTableName
+        Region1: us-west-2
+        Region2: ap-south-1
+
+  LambdaRoleStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+         - DynamoDBStack
+         - S3BucketStack
+    Properties:
+      TemplateURL: https://my-code-for-task.s3.ap-south-1.amazonaws.com/lambda-role.yaml
+      Parameters:
+        GlobalTableName: !Ref GlobalTableName
+        Region1: us-west-2
+        Region2: ap-south-1
+        S3BucketName: !Ref BucketName
+  
+  LambdaStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+         - LambdaRoleStack
+    Properties:
+      TemplateURL: https://my-code-for-task.s3.ap-south-1.amazonaws.com/ka-me-ha-me-ha-enabler.yaml
+      Parameters:
+        LambdaFunctionName: !Ref LambdaFunctionName
